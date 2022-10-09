@@ -27,7 +27,7 @@ int main(int argc, char const *argv[])
 
     pipe(pfd);
 
-    char op = 'y';
+    //char op = 'y';
     char cmdn1[10][20] = {0}; // separate it
     char cmdn2[10][20] = {0}; // separate it
     char * argv1[10] ; // give it to argv
@@ -60,7 +60,7 @@ int main(int argc, char const *argv[])
         for(i = 0; i <= string1.size(); i++)
         {
 
-            if(string1[i] == ' ' || string1[i] == '\0') // saparate command
+            if(string1[i] == ' ' || string1[i] == '\0') // separate command
             {
 
                 a[j] = '\0';
@@ -95,7 +95,7 @@ int main(int argc, char const *argv[])
         for(i = 0; i <= string2.size(); i++)
         {
 
-            if(string2[i] == ' ' || string2[i] == '\0') // saparate command
+            if(string2[i] == ' ' || string2[i] == '\0') // separate command
             {
 
                 a[j] = '\0';
