@@ -4,7 +4,8 @@
 //
 // Created by: Jacob Kurbis (z1945650)
 // 
-// Description: Is to write a program that 
+// Description: Is to write a program that will pipe the first command
+//              through the second command.
 //
 //              This is the C++ file that implements the function
 //              defintions declared on the header file pipe.h and called
@@ -23,30 +24,27 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <cstring>
 #include "pipe.h"
 
 /*
-Function: void pipe_fork()
-Use: This function 
+Function: void pipe_fork(int pipefd[], int rs, pid_t pid, char cmd1[], char cmd2[])
+Use: This function will create the child and parent processes to pipe the commands through. 
 
-Arguments: 
+Arguments: pipefd: An array of intgers to pipe the commands through
+           rs: An integer that will store the pipe
+           pid: A pid_t variable type that holds the child's process pid
+           cmd1: A character array that will hold the command 1 pointer
+           cmd2: A character array that that will hold the command 2 pointer
 
 Returns: Nothing
 Notes: None
 */
-void pipe_fork(int pipefd, int rs)
+void pipe_fork(int pipefd[], int rs, pid_t pid, char cmd1[], char cmd2[])
 {
-    //Creating Pipe
-    rs = pipe(pipefd);
-    //Error Check
-    if(rs < 0)
-    {
-        perror("PIPE");
-        exit(1);
-    }
 
     //Fork into Parent and Child processes
-    rs = fork();
+    pid = fork();
     //Error Check
     if(rs < 0)
     {
@@ -62,10 +60,8 @@ void pipe_fork(int pipefd, int rs)
         dup(pipefd[0]);//Duplicate read end of pipe in standard input
         close(pipefd[0]);//close read end of pipe
 
-        //strtok();
-
         //run wc
-        rs = execvp();
+        pid = execvp(cmd1, nullptr);
         //Error Check
         if (rs < 0)
         {
@@ -73,10 +69,6 @@ void pipe_fork(int pipefd, int rs)
             exit(1);
         }
 
-        //ssize_t nr = read(pipefd[0], buffer, sizeof(buffer));
-        //write(1, buffer, nr);
-
-        //cout << "pipe contained:" << buffer << endl;
 
     }
 
@@ -89,10 +81,8 @@ void pipe_fork(int pipefd, int rs)
 
         close(pipefd[1]);//close write end of the pipe
 
-        //strtok();
-
         //run ls
-        rs = execvp();
+        pid = execvp(cmd2, nullptr);
         //Error Check
         if (rs < 0)
         {
@@ -100,8 +90,6 @@ void pipe_fork(int pipefd, int rs)
             exit(1);
         }
 
-        //write(1, buffer, nr);//write to right end of pipe
-        //wait(&rs)
     }
 }
 
