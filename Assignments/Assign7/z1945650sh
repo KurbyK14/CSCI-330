@@ -1,0 +1,382 @@
+#
+# Jacob Kurbis
+# z1945650
+# CSCI 330
+# Due 10/27/2022
+#
+
+#!/bin/bash
+
+#Creating the Database
+create() 
+{
+    printf "%s\n" "$2" > "$1"
+    printf "New Database Created\n\n"
+}
+
+
+#Adding record(s) to the database
+insert() 
+{
+    #If the file does not exist
+    if [ ! -f "$1" ];
+    then
+        printf "Error: %s does not exist\n\n" "$1"
+        exit 1
+    fi
+
+    #Car must be made between dates 1921 and 2029
+    if [[ "$4" -gt 1921 && "$4" -lt 2029 ]]; 
+    then
+        #As long as these three arguments are not empty, add the record
+        if [[ ! -z "$2" && ! -z "$3" && ! -z "$5" ]]; 
+        then
+            printf "%s, %s, %s, %s\n" "$2" "$3" "$4" "$5" >> "$1"
+            printf "Added a new record to the Database\n\n"
+            exit 1
+
+        else
+            printf "Error: Car credentials must be greater than length 0\n\n"
+            exit 1
+
+        fi
+
+    #If the year of the car is not between 1921 and 2029
+    else
+        printf "Error: The year of the car must be greater than 1921 and less than 2029\n\n"
+        exit 1
+
+    fi
+
+}
+
+
+#Count and print the amount of records in the database
+count()
+{
+    if [ -f "$1" ]; 
+    then
+        cnt=$(wc -l < "$1")
+        printf "$(($cnt - 1))\n\n"
+        exit 1
+
+    else
+        printf "Error: %s does not exist\n\n" "$1"
+        exit 1
+        
+    fi
+}
+
+
+#Displaying records in the database
+display() 
+{
+    #If the file does not exist
+    if [ ! -f "$1" ];
+    then
+        printf "Error: %s does not exist\n\n" "$1"
+        exit 1
+    fi
+
+    #If not specified
+    if [ "$2" = "" ]; 
+    then
+        printf "Error: specify all, single number, or range of numbers of records to display\n\n"
+        exit 1
+
+    fi
+
+    #If all specified
+    if [ "$2" = "all" ]; 
+    then
+            cat "$1"
+            printf "\n"
+            exit 1
+    
+    #If single specified
+    elif [ "$2" = "single" ]; 
+    then
+        
+        #If line not specified or blank after single
+        if [  "$3" = "" ]; 
+        then
+            printf "Error: Specify number after single\n\n"
+            exit 1
+
+        #If line specified greater than the amount of lines in database
+        elif [ "$3" -gt $# ]; 
+        then
+            printf "Error: Specified line does not exist\n\n"
+            exit 1
+        
+        else
+            sed -n $(($3 + 1))p "$1"
+            printf "\n"
+            exit 1
+
+        fi
+
+    #If range specified
+    elif [ "$2" = "range" ]; 
+    then
+
+    #If line not specified or blank after range
+        if [  "$3" = "" ]; 
+        then
+            printf "Error: Please specify range\n\n"
+            exit 1
+
+        else
+            sed -n $(($3 + 1)),$(($4 + 1))p "$1"
+            printf "\n\n"
+            exit 1
+        fi
+
+    fi
+
+}
+
+
+#To delete all, single, or range of records
+delete() 
+{
+    #If the file does not exist
+    if [ ! -f "$1" ];
+    then
+        printf "Error: %s does not exist\n\n" "$1"
+        exit 1
+    fi
+        
+    #If not specified
+    if [ "$2" = "" ]; 
+    then
+        printf "Error: specify all, single number, or range of numbers of records to delete\n\n"
+        exit 1
+
+    fi
+
+    #If all is specified, delete all of the records in the database
+    if [ "$2" = "all" ]; 
+    then
+        sed -i '1!d' "$1"
+        printf "All records Deleted\n\n"
+        exit 1
+    
+    #If single specified, delete the record at specified line
+    elif [ "$2" = "single" ]; 
+    then
+
+        #If line not specified or blank after single
+        if [  "$3" = "" ]; 
+        then
+            printf "Error: Specify number after single to delete\n\n"
+            exit 1
+        
+        #If entry is does not exist
+        elif [ "$3" -gt $# ];
+        then
+            printf "Record does not exist\n\n"
+            exit 1
+
+        else
+            sed -i  $(($3 + 1))d "$1"
+            printf "Single Record Deleted\n\n"
+            exit 1
+
+        fi
+        
+
+    #If range of records specified, delete records in specified range
+    elif [ "$2" = "range" ]; 
+    then
+        #If line not specified or blank after range
+        if [  "$3" = "" ]; 
+        then
+            printf "Error: Please specify range of records to delete\n\n"
+            exit 1
+
+        else
+            sed -i  $(($3 + 1)),$(($4 + 1))d "$1"
+            printf "$(($4 - $3 + 1)) Range of Records Deleted\n\n"
+            exit 1
+        
+        fi
+    
+    fi
+
+}
+
+
+#Interactive Mode
+if [ ! $# = 0 ]; 
+then
+    #If no arguments are provided
+    if [ $# = 1 ]; 
+    then
+        printf "Error: Please provide a command and database\n\n"
+        exit 1
+
+    fi
+
+    #If create is specified
+    if [ $2 = "create" ]; 
+    then
+
+        if [ $# = 2 ]; 
+        then
+            #If no name is given
+            create "$1" "Untitled Database"
+
+        else
+            create "$1" "$3"
+
+        fi
+
+    #If insert is specified
+    elif [[ $2 = "insert" || $2 = "add" ]]; 
+    then
+
+        #If parameters are provided
+        if [ $# = 6 ]; 
+        then
+            insert "$1" "$3" "$4" "$5" "$6"
+
+        else
+            printf "Error: Please provide 5 parameters\n\n"
+            exit 1
+
+        fi
+
+    #If count is specified
+    elif [ "$2" = "count" ]; 
+    then
+        count "$1"
+    
+    #If display is specified
+    elif [ "$2" = "display" ]; 
+    then
+        display "$1" "$3" "$4" "$5"
+
+    #If delete is specified
+    elif [ "$2" = "delete" ]; 
+    then
+        delete "$1" "$3" "$4" "$5"
+
+    #If no command is specified
+    else
+        printf "Error: Please specify a listed command %s\n\n" "$2"
+        exit 1
+    fi
+
+#Interactive Mode
+else
+    #Continue variable; Will loop until it is not equal to y
+    CT="y"
+
+    while [ $CT = "y" ]; 
+    do
+        #Entering Database file name
+        read -p "Enter the name of the Database: " DB
+        while [ -z "$DB" ]; 
+        do
+            read -p "Error: Please provide a Database name!: " DB
+
+        done
+
+        #Retrieving argument
+        read -p "Type a command: create, insert, count, display, or delete: " arg
+
+        if [ "$arg" = "create" ]; 
+        then
+            read -p "Enter the Title for the Database: " title
+            if [ -z "$title" ]; 
+            then
+                title="Untitled Database"
+
+            fi
+
+            create "$DB" "$title"
+
+        elif [[ $arg = "insert" || $arg = "add" ]]; 
+        then
+            #Inserting Car Criteria
+            read -p "Enter Make of Car: " make
+            read -p "Enter Model of Car: " model
+            read -p "Enter Year Car was made (between 1922-2028): " year
+            read -p "Enter Color of Car: " color
+        
+            insert "$DB" "$make" "$model" "$year" "$color"
+
+        elif [ $arg = "display" ]; 
+        then
+            #Prompt for which display option
+            read -p "Display all, single, or within specific range? (Enter: all, single or range): " quant
+        
+            if [ $quant = "single" ]; 
+            then
+                read -p "Enter which record number: " single
+                display "$DB" "$quant" "$single"
+
+            elif [ $quant = "range" ]; 
+            then
+                read -p "Enter the Start of Range: " start_range
+                read -p "Enter the End of Range: " end_range
+                display "$DB" "$quant" "$start_range" "$end_range"
+
+            elif [ $quant = "all" ]; 
+            then
+                display "$DB" "$quant"
+
+            else
+                #If no command is specified
+                printf "Error: %s  is not valid\n\n" "$quant"
+
+            fi
+
+        #If count specified
+        elif [ $arg = "count" ]; 
+        then
+            count "$DB"
+
+        #If delete specified
+        elif [ $arg = "delete" ]; 
+        then
+
+            #Prompt for which delete option
+            read -p "Delete all, single, or within specific range? (Enter: all, single or range): " quant
+            if [ $quant = "single" ]; 
+            then
+                read -p "Enter which record number: " single
+                delete "$DB" "$quant" "$single"
+
+            elif [ $quant = "range" ]; 
+            then
+                read -p "Enter Start of Range: " start_range
+                read -p "Enter End of Range: " end_range
+                delete "$DB" "$quant" "$start_range" "$end_range"
+
+            elif [ $quant = "all" ]; 
+            then
+                delete "$DB" "$quant"
+
+
+            else
+                printf "Error: %s  is not valid\n\n" "$quant"
+
+            fi
+
+        #If no command is specified
+        else
+            printf "Error: invalid command: %s\n\n" "$arg"
+            exit 1       
+
+        fi
+
+        #Prompt to continue
+        read -p "Would you like to continue? (y/n): " CT
+
+    done
+
+fi
+
+exit 0
